@@ -27,22 +27,15 @@ st.write(
 st.markdown("---")
 
 # --- Memuat Model dengan caching ---
-# --- Memuat Model dengan caching ---
 @st.cache_resource
 def load_model():
-    from tensorflow.keras.layers import Flatten
-
     with st.spinner('🔄 Model sedang diunduh dan dimuat...'):
         model_path = hf_hub_download(
             repo_id="benJowl/KlasifikasiAnjingKucing",
             filename="best_transfer_model.h5"
         )
-        # Tambahkan custom_objects supaya Flatten lama dikenali
-        model = tf.keras.models.load_model(
-            model_path,
-            compile=False,
-            custom_objects={"Flatten": Flatten}
-        )
+        # Tidak perlu custom_objects karena Flatten bawaan keras
+        model = tf.keras.models.load_model(model_path, compile=False)
         st.success('✅ Model berhasil dimuat!')
         return model
 
@@ -83,21 +76,13 @@ if uploaded_file:
         confidence = float(pred[0][0])
         label = "Anjing" if confidence > 0.5 else "Kucing"
         confidence_display = confidence if label == "Anjing" else 1 - confidence
-        # Buat distribusi probabilitas untuk chart
-        probas = {
-            "Anjing": confidence,
-            "Kucing": 1 - confidence
-        }
+        probas = {"Anjing": confidence, "Kucing": 1 - confidence}
     else:  # model multi-kelas
         confidence = float(np.max(pred[0]))
         predicted_class_index = np.argmax(pred[0])
         label = "Anjing" if predicted_class_index == 0 else "Kucing"
         confidence_display = confidence
-        # Buat distribusi probabilitas untuk chart
-        probas = {
-            "Anjing": float(pred[0][0]),
-            "Kucing": float(pred[0][1])
-        }
+        probas = {"Anjing": float(pred[0][0]), "Kucing": float(pred[0][1])}
 
     st.subheader("📊 Hasil Prediksi")
     st.metric(
