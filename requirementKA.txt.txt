@@ -2,4 +2,5 @@
 tensorflow
 Pillow
 numpy
+kagglehub
 huggingface_hub
